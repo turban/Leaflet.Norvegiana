@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Norvegiana</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<!--<meta property="og:image" content="route.png" />-->
+	<link rel="stylesheet" href="../lib/leaflet/leaflet.css" />
+	<link rel="stylesheet" href="../lib/sidebar/L.Control.Sidebar.css" />
+	<link rel="stylesheet" href="../lib/markercluster/MarkerCluster.css" />
+	<link rel="stylesheet" href="../lib/markercluster/MarkerCluster.Default.css" />	
+	<style>
+		html, body, #map { margin: 0; height: 100%; background: #fff; }
+	</style>
+</head>
+<body>
+
+    <div id="sidebar">
+    </div>
+
+	<div id="map"></div>
+	<script src="../lib/reqwest.min.js"></script>			
+	<script src="../lib/leaflet/leaflet.js"></script>
+	<script src="../lib/sidebar/L.Control.Sidebar.js"></script>
+	<script src="../lib/markercluster/leaflet.markercluster.js"></script>	
+	<script src="../Leaflet.Norvegiana.js"></script>
+	<script>
+
+	var map = L.map('map', {
+		minZoom: 5,
+		maxZoom: 16
+	}).setView([59.337, 5.972], 11);
+		
+	var sidebar = L.control.sidebar('sidebar', {
+		closeButton: true,
+		position: 'left'
+	});
+	map.addControl(sidebar);
+
+	L.tileLayer('http://opencache.statkart.no/gatekeeper/gk/gk.open_gmaps?layers=topo2&zoom={z}&x={x}&y={y}', {
+		attribution: '&copy; <a href="http://kartverket.no/">Kartverket</a>'
+	}).addTo(map);
+
+	// Single point, FeatureGroup
+	/*
+	L.norvegiana({
+		params: {
+			pt: '59.337,5.97',
+			rows: 10
+		}
+	}).addTo(map); 
+	*/
+
+
+
+	// Single point, MarkerClusterGroup
+	/*
+	L.norvegiana({
+		cluster: true,
+		params: {
+			pt: '59.337,5.97',
+			rows: 10
+		}
+	}).addTo(map); 
+	*/
+
+	// Grid, FeatureGroup
+	/*
+	L.norvegiana({
+		params: {
+			rows: 10
+		}
+	}).addTo(map); 
+	*/
+
+	// Grid, MarkerClusterGroup
+
+	var content = {
+		title: function (data) {
+			return data.delving_title;
+		}, 
+		media: function (data) {
+			if (data.abm_videoUri) {
+				return '<iframe src="' + data.abm_videoUri + '" width="100%" height="300px" frameborder="0"></iframe>';
+			}			
+			if (data.delving_thumbnail) {
+				return '<img src="' + data.delving_thumbnail + '" width="100%">';
+			}
+			return '';
+		},
+		text: function (data) {
+			return data.delving_description || data.abm_introduction;
+		},
+		source: function (data) {
+			//return '';
+			return 'Kilde: <a href="' + data.delving_landingPage + '">' + data.delving_collection.join(', ') + '</a>'; //<br>'
+			    // + 'Forfatter: ' + data.delving_creator.join(', ');
+		}
+
+	}
+
+
+	var markers = L.markerClusterGroup().on('click', function (evt) {
+		var item = evt.layer.options.item;
+
+		var html = '<table>'; 
+		for (var key in item) {
+			html += '<tr><td>' + key + '</td><td>' + item[key] + '</td></tr>';
+		} 		
+		html += '</table>';
+
+		var data = L.extend(item, content);
+
+		sidebar.setContent(L.Util.template('<h2>{title}</h2>{media}<p>{text}</p>{source}', data) + html).show();
+	});
+
+	L.norvegiana({
+		layer: markers,
+		params: {
+			//qf: 'abm_category_text:Historie og samfunn',
+			rows: 100
+		}
+	}).addTo(map); 
+
+
+
+// Historie og samfunn 
+
+	//console.log(markers.load);
+
+	/*
+	var markers = L.norvegiana({
+		params: {
+			pt: '59.337,5.97',
+			//fq: 'store:[59.3,5.9 TO 59.4,6]',
+			//pt: '',
+			//qf: 'abm_category_text:kulturminner',
+			//qf: {
+			//	abm_category_text: 'kulturminner',
+			//	europeana_type_text: 'image'
+			//},
+			rows: 10,
+			d: 10,
+			geoType: 'bbox'
+		}		
+	}).addTo(map); 
+	*/
+
+	/*
+	console.log(L.Layer);
+
+	markers.on('click', function (a) {
+	    console.log('marker ', a.layer.options.item);
+	});
+	*/	
+
+	</script>
+</body>
+</html>
