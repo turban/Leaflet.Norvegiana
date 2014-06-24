@@ -29,7 +29,9 @@
 	var map = L.map('map', {
 		minZoom: 5,
 		maxZoom: 16
-	}).setView([59.337, 5.972], 11);
+	//}).setView([59.337, 5.972], 11);
+	}).fitBounds([[60.87, 7.012], [60.492, 7.924]]);
+
 		
 	var sidebar = L.control.sidebar('sidebar', {
 		closeButton: true,
@@ -118,6 +120,7 @@
 		layer: markers,
 		params: {
 			//qf: 'abm_category_text:Historie og samfunn',
+			qf: 'abm_classification_text:Rallarvegen',
 			rows: 100
 		}
 	}).addTo(map); 
