@@ -1,6 +1,7 @@
 L.Norvegiana = L.FeatureGroup.extend({
 	options: {
-		api: 'http://kulturnett2.delving.org/api/search',		
+		api: 'http://kulturnett2.delving.org/api/search',
+		markerOptions: {}	
 	},
 
 	// Default Norvegiana API params
@@ -11,7 +12,7 @@ L.Norvegiana = L.FeatureGroup.extend({
 	},
 
 	initialize: function (options) {	
-		L.setOptions(this, options);	
+		options = L.setOptions(this, options);
 		L.FeatureGroup.prototype.initialize.call(this);
 	},
 
@@ -43,6 +44,8 @@ L.Norvegiana = L.FeatureGroup.extend({
 
 	// Parse Norvegiana API response
 	_parse: function (items) {
+		var options = this.options;
+
 		for (var i = 0, len = items.length; i < len; i++) {
 			var data = items[i].item.fields;
 			
@@ -50,7 +53,15 @@ L.Norvegiana = L.FeatureGroup.extend({
 			if (data.abm_latLong) {
 				var latlng = data.abm_latLong[0].split(','),
 					id     = data.delving_hubId[0],
-					marker = L.marker(latlng);
+					marker;
+
+				if (options.iconCreateFunction) {
+					marker =  L.marker(latlng, L.extend({
+						icon: options.iconCreateFunction(data)
+					}, this.options.markerOptions));
+				} else {
+					marker = L.marker(latlng, this.options.markerOptions);
+				}
 
 				// Store id not to add layer more than once
 				marker._leaflet_id = id;
