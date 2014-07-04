@@ -1,28 +1,33 @@
 L.Norvegiana = L.FeatureGroup.extend({
 	options: {
 		api: 'http://kulturnett2.delving.org/api/search',
-		markerOptions: {}	
+		markerOptions: {},
+		params: {
+			query: '*:*',
+			format: 'jsonp',
+			rows: 500			
+		}	
 	},
 
-	// Default Norvegiana API params
-	norvegiana: {
-		query: '*:*',
-		format: 'jsonp',
-		rows: 500
-	},
-
-	initialize: function (options) {	
+	initialize: function (options) {
+		options = options || {};
+		if (!options.params) {
+			this._loadOnAdd = false;
+		}
+		options.params = L.extend(this.options.params, options.params);
 		options = L.setOptions(this, options);
 		L.FeatureGroup.prototype.initialize.call(this);
 	},
 
 	onAdd: function (map) {
-		this._load(this._getUrl(), L.bind(this._onLoad, this));
+		if (this._loadOnAdd !== false) {
+			this._load(this._getUrl(), L.bind(this._onLoad, this));			
+		}
 		L.FeatureGroup.prototype.onAdd.call(this, map);
 	},
 
-	load: function () {
-		this._load(this._getUrl(), L.bind(this._onLoad, this));
+	load: function (params) {
+		this._load(this._getUrl(params), L.bind(this._onLoad, this));
 		return this;
 	},
 
@@ -36,10 +41,13 @@ L.Norvegiana = L.FeatureGroup.extend({
 	},
 
 	_onLoad: function (data) {
-		if (data.result && data.result.items) {
-			this._parse(data.result.items);
+		console.log(data);
+		if (data.result) {
+			if (data.result.items) {
+				this._parse(data.result.items);
+			}
 		}
-		this.fire('load');
+		this.fire('load', data);
 	},
 
 	// Parse Norvegiana API response
@@ -78,10 +86,16 @@ L.Norvegiana = L.FeatureGroup.extend({
 
 	// Get Norvegiana API params object
 	_getParams: function (params) {
-		params = L.extend({}, this.norvegiana, this.options.params, params || {});
+		params = L.extend({}, this.options.params, params || {});
+		if (params.latlng) {
+			var latlng = L.latLng(params.latlng);
+			params.pt = latlng.lat + ',' + latlng.lng;
+			delete params.latlng;
+		}
 		if (params.qf && typeof params.qf !== 'string') {
 			params.qf = this._getFilterString(params.qf);
 		}		
+		console.log(params);
 		return params;
 	},
 

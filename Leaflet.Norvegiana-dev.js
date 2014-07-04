@@ -15,7 +15,9 @@ L.Norvegiana = {
 	},
 
 	_onLoad: function (data) {
-		this._parse(data.items, this.addLayer);
+		if (data.result) {
+			this._parse(data.items, this.addLayer);
+		}
 	},
 
 	// Parse Norvegiana API response

@@ -19,7 +19,6 @@ var cluster = new L.MarkerClusterGroup({
 	spiderfyOnMaxZoom: false,
 	iconCreateFunction: function(cluster) {
 		var iconUrl = cluster.getAllChildMarkers()[0].data.delving_thumbnail[0].replace(/=400/g, '=40');
-
 		return new L.DivIcon({
 			className: 'leaflet-marker-cluster',  
 			html: '<img src="' + iconUrl + '"><b>' + cluster.getChildCount() + '</b>' 
@@ -46,8 +45,7 @@ L.norvegiana({
 		d: 1,
 		qf: {
 			abm_contentProvider_text: 'DigitaltMuseum'
-		},	
-		rows: 500
+		}
 	},
 	iconCreateFunction: function (data) {
 		var iconUrl = data.delving_thumbnail[0];	
